@@ -222,3 +222,67 @@ function likeStory(id, currentLikes) {
     console.error(error);
   });
 }
+
+
+/* ---------------- TEXT FORMATTING ---------------- */
+/*
+  This function applies formatting like bold, italic, underline
+  using browser's execCommand (simple rich text handling)
+*/
+function formatText(command) {
+  document.execCommand(command, false, null);
+}
+
+
+/* ---------------- POST STORY WITH RICH TEXT ---------------- */
+const postStoryBtn = document.getElementById("postStoryBtn");
+
+if (postStoryBtn) {
+  postStoryBtn.addEventListener("click", () => {
+
+    // Get title from input
+    const title = document.getElementById("storyTitle").value.trim();
+
+    // Get HTML content from editor (rich text)
+    const content = document.getElementById("storyEditor").innerHTML.trim();
+
+    const user = auth.currentUser;
+
+    // Check login
+    if (!user) {
+      alert("Please login to post a story ❤️");
+      return;
+    }
+
+    // Validation
+    if (!title || !content) {
+      alert("Please fill both title and story");
+      return;
+    }
+
+    // Save to Firestore
+    db.collection("stories").add({
+      title: title,
+      content: content, // HTML content stored
+      userEmail: user.email || "Google User",
+      userId: user.uid,
+      likes: 0,
+      likedBy: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      alert("Story posted successfully ✅");
+
+      // Clear inputs after posting
+      document.getElementById("storyTitle").value = "";
+      document.getElementById("storyEditor").innerHTML = "";
+
+      // Scroll to stories section
+      document.getElementById("stories").scrollIntoView({ behavior: "smooth" });
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+
+  });
+}
