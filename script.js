@@ -40,32 +40,54 @@ const auth = firebase.auth();
 
 // Signup
 const signupBtn = document.getElementById("signupBtn");
-signupBtn.addEventListener("click", () => {
-  const email = document.getElementById("signupEmail").value;
-  const password = document.getElementById("signupPassword").value;
+if (signupBtn) {
+  signupBtn.addEventListener("click", () => {
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(userCredential => {
-      alert("Signup successful");
-      console.log(userCredential.user);
-    })
-    .catch(error => {
-      alert(error.message);
-    });
-});
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        alert("Signup successful");
+        console.log(userCredential.user);
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  });
+}
 
 // Login
 const loginBtn = document.getElementById("loginBtn");
-loginBtn.addEventListener("click", () => {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then(userCredential => {
-      alert("Login successful");
-      console.log(userCredential.user);
-    })
-    .catch(error => {
-      alert(error.message);
-    });
-});
+    auth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        alert("Login successful");
+        console.log(userCredential.user);
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  });
+}
+
+// Google login
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    auth.signInWithPopup(provider)
+      .then(result => {
+        alert("Google login successful");
+        console.log(result.user);
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  });
+}
