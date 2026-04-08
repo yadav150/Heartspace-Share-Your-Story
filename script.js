@@ -202,20 +202,32 @@ function loadStories() {
         card.className = "story-card";
 
         card.innerHTML = `
-          <h3>${story.title}</h3>
-          <p>${story.content}</p>
+  <h3>${story.title}</h3>
 
-          <div class="story-meta">
-            <span>👤 ${story.userEmail || "Anonymous"}</span>
-            <span>• ${date}</span>
-          </div>
+  <p class="story-preview-text">
+    ${story.content.substring(0, 160)}${story.content.length > 160 ? "..." : ""}
+  </p>
 
-          <div style="margin-top:10px;">
-            <button onclick="likeStory('${id}', ${likes})">
-              ❤️ Like (${likes})
-            </button>
-          </div>
-        `;
+  <div class="story-meta">
+    <span>👤 ${story.userEmail || "Anonymous"}</span>
+    <span>• ${date}</span>
+  </div>
+
+  <button class="btn btn-ghost btn-read-more" data-id="${id}">
+    Read More
+  </button>
+`;
+
+storiesList.appendChild(card);
+
+// 3) Read More button click → story page
+document.addEventListener("click", e => {
+  const readMoreBtn = e.target.closest(".btn-read-more");
+  if (readMoreBtn) {
+    const id = readMoreBtn.getAttribute("data-id");
+    window.open(`story.html?id=${id}`, "_blank");
+  }
+});
 
         storiesList.appendChild(card);
       });
