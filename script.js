@@ -183,11 +183,33 @@ loadStories();
 
 /* ---------------- LIKE FUNCTION ---------------- */
 function likeStory(id, currentLikes) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("Please login to like ❤️");
+    return;
+  }
+
   const storyRef = db.collection("stories").doc(id);
 
-  storyRef.update({
-    likes: currentLikes + 1
-  }).catch(error => {
-    console.error(error);
+  storyRef.get().then(doc => {
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    let likedBy = data.likedBy || [];
+
+    // ✅ Prevent multiple likes
+    if (likedBy.includes(user.uid)) {
+      alert("You already liked this story ❤️");
+      return;
+    }
+
+    // ✅ Update Firestore
+    storyRef.update({
+      likes: (data.likes || 0) + 1,
+      likedBy: [...likedBy, user.uid]
+    }).catch(error => {
+      console.error(error);
+    });
   });
 }
