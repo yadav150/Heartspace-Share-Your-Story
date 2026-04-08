@@ -38,8 +38,9 @@ window.addEventListener('scroll', () => {
 // Firebase Auth instance
 const auth = firebase.auth();
 
-// Signup
+/* ---------------- SIGNUP ---------------- */
 const signupBtn = document.getElementById("signupBtn");
+
 if (signupBtn) {
   signupBtn.addEventListener("click", () => {
     const email = document.getElementById("signupEmail").value;
@@ -49,6 +50,10 @@ if (signupBtn) {
       .then(userCredential => {
         alert("Signup successful");
         console.log(userCredential.user);
+
+        // clear inputs
+        document.getElementById("signupEmail").value = "";
+        document.getElementById("signupPassword").value = "";
       })
       .catch(error => {
         alert(error.message);
@@ -56,8 +61,9 @@ if (signupBtn) {
   });
 }
 
-// Login
+/* ---------------- LOGIN ---------------- */
 const loginBtn = document.getElementById("loginBtn");
+
 if (loginBtn) {
   loginBtn.addEventListener("click", () => {
     const email = document.getElementById("loginEmail").value;
@@ -67,6 +73,10 @@ if (loginBtn) {
       .then(userCredential => {
         alert("Login successful");
         console.log(userCredential.user);
+
+        // clear inputs
+        document.getElementById("loginEmail").value = "";
+        document.getElementById("loginPassword").value = "";
       })
       .catch(error => {
         alert(error.message);
@@ -74,7 +84,7 @@ if (loginBtn) {
   });
 }
 
-// Google login
+/* ---------------- GOOGLE LOGIN ---------------- */
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 
 if (googleLoginBtn) {
@@ -91,26 +101,24 @@ if (googleLoginBtn) {
       });
   });
 }
-// Elements
+
+/* ---------------- USER UI ---------------- */
 const userBox = document.getElementById("userBox");
 const userEmailText = document.getElementById("userEmail");
 const logoutBtn = document.getElementById("logoutBtn");
 
-// Listen to auth state changes
-auth.onAuthStateChanged(user => {
-  if (user) {
-    // Show user box
-    userBox.style.display = "block";
+if (userBox && userEmailText) {
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      userBox.style.display = "block";
+      userEmailText.textContent = user.email || "Google User";
+    } else {
+      userBox.style.display = "none";
+    }
+  });
+}
 
-    // Display email (Google users may not always have email visible in same way)
-    userEmailText.textContent = user.email || "Google User";
-  } else {
-    // Hide user box when logged out
-    userBox.style.display = "none";
-  }
-});
-
-// Logout
+/* ---------------- LOGOUT ---------------- */
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
     auth.signOut()
@@ -120,5 +128,66 @@ if (logoutBtn) {
       .catch(error => {
         alert(error.message);
       });
+  });
+}
+
+/* ---------------- FIRESTORE INIT ---------------- */
+const db = firebase.firestore();
+
+/* ---------------- LOAD STORIES WITH LIKE BUTTON ---------------- */
+const storiesList = document.getElementById("storiesList");
+
+function loadStories() {
+  if (!storiesList) return;
+
+  db.collection("stories")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      storiesList.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const story = doc.data();
+        const id = doc.id;
+
+        const date = story.createdAt?.toDate
+          ? story.createdAt.toDate().toLocaleString()
+          : "Just now";
+
+        const likes = story.likes || 0;
+
+        const card = document.createElement("div");
+        card.className = "story-card";
+
+        card.innerHTML = `
+          <h3>${story.title}</h3>
+          <p>${story.content}</p>
+
+          <div class="story-meta">
+            <span>👤 ${story.userEmail || "Anonymous"}</span>
+            <span>• ${date}</span>
+          </div>
+
+          <div style="margin-top:10px;">
+            <button onclick="likeStory('${id}', ${likes})">
+              ❤️ Like (${likes})
+            </button>
+          </div>
+        `;
+
+        storiesList.appendChild(card);
+      });
+    });
+}
+
+loadStories();
+
+/* ---------------- LIKE FUNCTION ---------------- */
+function likeStory(id, currentLikes) {
+  const storyRef = db.collection("stories").doc(id);
+
+  storyRef.update({
+    likes: currentLikes + 1
+  }).catch(error => {
+    console.error(error);
   });
 }
