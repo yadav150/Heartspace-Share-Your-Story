@@ -286,3 +286,19 @@ if (postStoryBtn) {
 
   });
 }
+
+/*------------Redirect to login----------*/
+
+firebase.auth().onAuthStateChanged((user) => {
+
+  const storyEditor = document.getElementById("storyEditor");
+
+  // Run only if we are on write page
+  if (storyEditor) {
+    if (!user) {
+      alert("Please login to write a story");
+      window.location.href = "auth.html";
+    }
+  }
+
+});
