@@ -302,3 +302,20 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 
 });
+
+/*---------------------forgot Password-----------------*/
+document.getElementById("forgotPassword")?.addEventListener("click", () => {
+
+  const email = document.getElementById("loginEmail").value;
+
+  if (!email) {
+    alert("Please enter your email in login field first");
+    return;
+  }
+
+  firebase.auth().sendPasswordResetEmail(email)
+    .then(() => {
+      alert("Password reset email sent!");
+    })
+    .catch(err => alert(err.message));
+});
