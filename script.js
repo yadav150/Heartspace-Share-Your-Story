@@ -186,7 +186,7 @@ function likeStory(id, currentLikes) {
   const user = auth.currentUser;
 
   if (!user) {
-    alert("Please login to like ❤️");
+    alert("Please login to continue ❤️");
     return;
   }
 
@@ -198,18 +198,27 @@ function likeStory(id, currentLikes) {
     const data = doc.data();
     let likedBy = data.likedBy || [];
 
-    // ✅ Prevent multiple likes
-    if (likedBy.includes(user.uid)) {
-      alert("You already liked this story ❤️");
-      return;
+    const userId = user.uid;
+    const isLiked = likedBy.includes(userId);
+
+    if (isLiked) {
+      // 💔 Unlike
+      const updatedLikedBy = likedBy.filter(uid => uid !== userId);
+
+      storyRef.update({
+        likes: Math.max((data.likes || 1) - 1, 0),
+        likedBy: updatedLikedBy
+      });
+
+    } else {
+      // ❤️ Like
+      storyRef.update({
+        likes: (data.likes || 0) + 1,
+        likedBy: [...likedBy, userId]
+      });
     }
 
-    // ✅ Update Firestore
-    storyRef.update({
-      likes: (data.likes || 0) + 1,
-      likedBy: [...likedBy, user.uid]
-    }).catch(error => {
-      console.error(error);
-    });
+  }).catch(error => {
+    console.error(error);
   });
 }
