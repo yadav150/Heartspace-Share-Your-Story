@@ -46,14 +46,46 @@ window.addEventListener('scroll', () => {
 
 /* ---------------- SIGNUP ---------------- */
 document.getElementById("signupBtn")?.addEventListener("click", () => {
-  const email = document.getElementById("signupEmail").value.trim();
-  const password = document.getElementById("signupPassword").value;
+  const emailInput = document.getElementById("signupEmail");
+  const passwordInput = document.getElementById("signupPassword");
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
+  // 1. Empty check
+  if (!email) {
+    alert("Please enter your email.");
+    emailInput.focus();
+    return;
+  }
+  if (!password) {
+    alert("Please create a password.");
+    passwordInput.focus();
+    return;
+  }
+
+  // 2. Simple email format check
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Please enter a valid email address.");
+    emailInput.focus();
+    return;
+  }
+
+  // 3. Firebase signup
   auth.createUserWithEmailAndPassword(email, password)
     .then(() => {
       window.location.href = "dashboard.html";
     })
-    .catch(err => alert(err.message));
+    .catch(err => {
+      if (err.code === "auth/invalid-email") {
+        alert("Please enter a valid email address.");
+      } else if (err.code === "auth/weak-password") {
+        alert("Password should be at least 6 characters.");
+      } else if (err.code === "auth/email-already-in-use") {
+        alert("This email is already registered.");
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    });
 });
 
 /* ---------------- LOGIN ---------------- */
